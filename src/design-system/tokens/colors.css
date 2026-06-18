@@ -1,0 +1,89 @@
+/* Buniverse — Color tokens
+   Palette derived from the brand wordmark and 3D Dubai hero illustrations:
+   deep navy ink, champagne gold, desert sand, and turquoise sea. */
+:root {
+  /* ---- Base ramps ---- */
+
+  /* Navy / ink — the wordmark colour, primary brand hue */
+  --navy-900: #0c1430;
+  --navy-800: #131e44;
+  --navy-700: #1b2a57;   /* logo navy */
+  --navy-600: #243673;
+  --navy-500: #324a93;
+  --navy-400: #5a73b8;
+  --navy-300: #93a6d4;
+  --navy-200: #c5cfe9;
+  --navy-100: #e6eaf6;
+  --navy-050: #f3f5fb;
+
+  /* Gold / champagne — accent, used for the skyscraper mark & speech bubbles */
+  --gold-900: #6e521c;
+  --gold-700: #a8842f;
+  --gold-600: #c19743;
+  --gold-500: #cba45c;   /* signature gold */
+  --gold-400: #d8b878;
+  --gold-300: #e6cd9c;
+  --gold-200: #f0e0c2;
+  --gold-100: #f7efdd;
+
+  /* Sand / cream — warm neutral backgrounds (beach + desert) */
+  --sand-700: #b7a584;
+  --sand-500: #ddcdac;
+  --sand-300: #ece1c9;
+  --sand-200: #f4ecdb;
+  --sand-100: #faf5ea;
+
+  /* Sea / turquoise — secondary accent (Gulf water) */
+  --sea-700: #1f7e8c;
+  --sea-500: #34a9bb;
+  --sea-300: #7fcdd8;
+  --sea-100: #d6f0f3;
+
+  /* Warm neutral grays */
+  --gray-900: #1a1c22;
+  --gray-700: #3f434d;
+  --gray-500: #6b7078;
+  --gray-400: #9aa0a8;
+  --gray-300: #c8ccd2;
+  --gray-200: #e4e7ea;
+  --gray-100: #f1f2f4;
+  --white: #ffffff;
+  --black: #000000;
+
+  /* ---- Semantic aliases ---- */
+  --brand-primary: var(--navy-700);
+  --brand-primary-hover: var(--navy-800);
+  --brand-primary-active: var(--navy-900);
+  --brand-accent: var(--gold-500);
+  --brand-accent-hover: var(--gold-600);
+  --brand-accent-soft: var(--gold-100);
+  --brand-sea: var(--sea-500);
+
+  --text-strong: var(--navy-900);
+  --text-body: var(--gray-700);
+  --text-muted: var(--gray-500);
+  --text-on-navy: #eef1fa;
+  --text-on-navy-muted: #9fabcf;
+  --text-on-gold: var(--navy-900);
+  --text-link: var(--navy-600);
+
+  --surface-page: var(--sand-100);
+  --surface-card: var(--white);
+  --surface-raised: var(--white);
+  --surface-sunken: var(--sand-200);
+  --surface-navy: var(--navy-700);
+  --surface-navy-deep: var(--navy-900);
+  --surface-cream: var(--sand-200);
+
+  --border-subtle: var(--gray-200);
+  --border-default: var(--gray-300);
+  --border-strong: var(--navy-200);
+  --border-gold: var(--gold-300);
+
+  --focus-ring: var(--gold-500);
+
+  --status-success: #2f8f5b;
+  --status-warning: var(--gold-700);
+  --status-danger: #c0473e;
+  --status-info: var(--sea-700);
+}

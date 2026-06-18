@@ -1,0 +1,8 @@
+/* Buniverse — Fonts
+   NOTE: No brand font files were supplied. These are the closest Google Fonts
+   matches to the heavy geometric wordmark and clean body text. Substitutions
+   flagged to the user — replace with licensed brand fonts when available.
+     Display  : "Sora"    (heavy geometric sans, echoes the BUNIVERSE wordmark)
+     Body/UI  : "Manrope" (clean humanist sans)
+     Mono/data: "JetBrains Mono" (specs, prices, figures) */
+@import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
