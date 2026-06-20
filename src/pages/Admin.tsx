@@ -1,11 +1,11 @@
 import { useEffect, useState, useCallback } from 'react'
-import { Inbox, Plane, Lock, LogOut, RefreshCw } from 'lucide-react'
+import { Inbox, Plane, Lock, LogOut, RefreshCw, KeyRound } from 'lucide-react'
 import type { Session } from '@supabase/supabase-js'
 import { Section } from '../components/sections/Section'
 import { Badge } from '../components/ui/Badge'
 import { Button } from '../components/ui/Button'
 import { useLang, type Localized } from '../i18n/LanguageContext'
-import { authConfigured, getSession, onAuthChange, signInWithPassword, sendOtp, verifyOtp, signOut, checkRole, type AdminRole } from '../lib/auth'
+import { authConfigured, getSession, onAuthChange, signInWithPassword, sendOtp, verifyOtp, signOut, checkRole, updatePassword, type AdminRole } from '../lib/auth'
 import {
   fetchEnquiries, fetchTourRequests, updateLeadStatus,
   type EnquiryRow, type TourRow, type LeadStatus,
@@ -108,9 +108,56 @@ function StatusSelect({ value, onChange }: { value: LeadStatus; onChange: (s: Le
   )
 }
 
+function ChangePassword({ onClose }: { onClose: () => void }) {
+  const { t } = useLang()
+  const [pw, setPw] = useState('')
+  const [pw2, setPw2] = useState('')
+  const [busy, setBusy] = useState(false)
+  const [msg, setMsg] = useState('')
+  const [ok, setOk] = useState(false)
+
+  const save = async () => {
+    setMsg('')
+    if (pw.length < 8) { setMsg(t({ ko: '비밀번호는 8자 이상이어야 합니다.', en: 'Password must be at least 8 characters.' })); return }
+    if (pw !== pw2) { setMsg(t({ ko: '비밀번호가 일치하지 않습니다.', en: 'Passwords do not match.' })); return }
+    setBusy(true)
+    const { error } = await updatePassword(pw)
+    setBusy(false)
+    if (error) setMsg(t({ ko: '변경 실패. 다시 시도해 주세요.', en: 'Failed. Please try again.' }))
+    else { setOk(true); setMsg(t({ ko: '비밀번호가 변경되었습니다.', en: 'Password updated.' })) }
+  }
+
+  return (
+    <div onClick={onClose} style={{ position: 'fixed', inset: 0, zIndex: 60, background: 'rgba(12,20,48,0.55)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
+      <div onClick={(e) => e.stopPropagation()} style={{ width: 'min(400px,100%)', background: 'var(--surface-card)', borderRadius: 'var(--radius-xl)', boxShadow: 'var(--shadow-xl)', padding: 28 }}>
+        <h3 style={{ margin: '0 0 16px', fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 19, color: 'var(--navy-900)' }}>{t({ ko: '비밀번호 변경', en: 'Change password' })}</h3>
+        {ok ? (
+          <>
+            <p style={{ margin: '0 0 20px', fontSize: 14, color: 'var(--status-success)' }}>{msg}</p>
+            <Button variant="primary" fullWidth onClick={onClose}>{t({ ko: '확인', en: 'Done' })}</Button>
+          </>
+        ) : (
+          <>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              <input style={field} type="password" placeholder={t({ ko: '새 비밀번호 (8자 이상)', en: 'New password (8+ chars)' })} value={pw} onChange={(e) => setPw(e.target.value)} />
+              <input style={field} type="password" placeholder={t({ ko: '새 비밀번호 확인', en: 'Confirm new password' })} value={pw2} onChange={(e) => setPw2(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && save()} />
+            </div>
+            {msg && <p style={{ margin: '12px 0 0', fontSize: 13, color: 'var(--status-danger)' }}>{msg}</p>}
+            <div style={{ display: 'flex', gap: 10, marginTop: 20 }}>
+              <Button variant="outline" fullWidth onClick={onClose}>{t({ ko: '취소', en: 'Cancel' })}</Button>
+              <Button variant="gold" fullWidth disabled={busy} onClick={save}>{busy ? '…' : t({ ko: '변경', en: 'Update' })}</Button>
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  )
+}
+
 function Dashboard({ email, role }: { email: string; role: AdminRole }) {
   const { t } = useLang()
   const [tab, setTab] = useState<'enquiries' | 'tours'>('enquiries')
+  const [showPw, setShowPw] = useState(false)
   const [enquiries, setEnquiries] = useState<EnquiryRow[]>([])
   const [tours, setTours] = useState<TourRow[]>([])
   const [loading, setLoading] = useState(true)
@@ -147,6 +194,7 @@ function Dashboard({ email, role }: { email: string; role: AdminRole }) {
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>{email}</span>
           <Button variant="ghost" size="sm" onClick={() => void load()} iconLeft={<RefreshCw size={14} />}>{t({ ko: '새로고침', en: 'Refresh' })}</Button>
+          <Button variant="ghost" size="sm" onClick={() => setShowPw(true)} iconLeft={<KeyRound size={14} />}>{t({ ko: '비밀번호', en: 'Password' })}</Button>
           <Button variant="outline" size="sm" onClick={() => void signOut()} iconLeft={<LogOut size={14} />}>{t({ ko: '로그아웃', en: 'Sign out' })}</Button>
         </div>
       </div>
@@ -214,6 +262,7 @@ function Dashboard({ email, role }: { email: string; role: AdminRole }) {
           )}
         </div>
       </div>
+      {showPw && <ChangePassword onClose={() => setShowPw(false)} />}
     </Section>
   )
 }

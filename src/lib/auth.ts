@@ -25,6 +25,13 @@ export async function signOut() {
   await supabase?.auth.signOut()
 }
 
+/** Change the signed-in user's password (no email required). */
+export async function updatePassword(newPassword: string): Promise<{ error?: string }> {
+  if (!supabase) return { error: 'Supabase not configured' }
+  const { error } = await supabase.auth.updateUser({ password: newPassword })
+  return { error: error?.message }
+}
+
 export async function getSession(): Promise<Session | null> {
   if (!supabase) return null
   const { data } = await supabase.auth.getSession()
