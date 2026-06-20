@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { PageHero } from '../components/sections/PageHero'
 import { Section } from '../components/sections/Section'
@@ -6,7 +6,7 @@ import { PropertyCard } from '../components/property/PropertyCard'
 import { Button } from '../components/ui/Button'
 import { useLang, type Localized } from '../i18n/LanguageContext'
 import { useEnquiry } from '../components/layout/enquiry'
-import { LISTINGS, LISTING_TYPES, type ListingType } from '../data/listings'
+import { fetchListings, LISTING_TYPES, type Listing, type ListingType } from '../lib/properties'
 
 const REGIONS = ['Palm Jumeirah', 'Business Bay', 'Dubai Marina', 'Downtown Dubai', 'JVC']
 
@@ -16,6 +16,16 @@ export function Properties() {
   const navigate = useNavigate()
   const [type, setType] = useState<ListingType | 'all'>('all')
   const [region, setRegion] = useState<string | null>(null)
+  const [listings, setListings] = useState<Listing[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    let active = true
+    fetchListings().then((l) => {
+      if (active) { setListings(l); setLoading(false) }
+    })
+    return () => { active = false }
+  }, [])
 
   const types: { key: ListingType | 'all'; label: Localized<string> }[] = [
     { key: 'all', label: { ko: '전체', en: 'All' } },
@@ -23,8 +33,8 @@ export function Properties() {
   ]
 
   const results = useMemo(
-    () => LISTINGS.filter((l) => (type === 'all' || l.type === type) && (!region || l.location.includes(region))),
-    [type, region],
+    () => listings.filter((l) => (type === 'all' || l.type === type) && (!region || l.location.includes(region))),
+    [listings, type, region],
   )
 
   const chip = (active: boolean): React.CSSProperties => ({
@@ -81,7 +91,9 @@ export function Properties() {
           )}
         </div>
 
-        {results.length > 0 ? (
+        {loading ? (
+          <div style={{ textAlign: 'center', padding: '56px 24px', color: 'var(--text-muted)' }}>{t({ ko: '매물을 불러오는 중…', en: 'Loading listings…' })}</div>
+        ) : results.length > 0 ? (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 22 }}>
             {results.map((l) => (
               <PropertyCard key={l.id} {...l} onClick={() => navigate(`/properties/${l.id}`)} />
@@ -95,10 +107,6 @@ export function Properties() {
             <Button variant="gold" onClick={onEnquire}>{t({ ko: '맞춤 매물 요청', en: 'Request a shortlist' })}</Button>
           </div>
         )}
-
-        <p style={{ margin: '24px 0 0', fontSize: 12, color: 'var(--text-muted)', textAlign: 'center' }}>
-          {t({ ko: '표시 매물은 예시이며 실제 매물 데이터는 순차 연동됩니다.', en: 'Listings shown are samples; live inventory is being connected.' })}
-        </p>
       </Section>
     </>
   )

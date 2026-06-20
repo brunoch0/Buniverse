@@ -1,11 +1,12 @@
 import { useEffect, useState, useCallback } from 'react'
-import { Inbox, Plane, Lock, LogOut, RefreshCw, KeyRound } from 'lucide-react'
+import { Inbox, Plane, Building2, Lock, LogOut, RefreshCw, KeyRound } from 'lucide-react'
 import type { Session } from '@supabase/supabase-js'
 import { Section } from '../components/sections/Section'
 import { Badge } from '../components/ui/Badge'
 import { Button } from '../components/ui/Button'
 import { useLang, type Localized } from '../i18n/LanguageContext'
 import { authConfigured, getSession, onAuthChange, signInWithPassword, sendOtp, verifyOtp, signOut, checkRole, updatePassword, type AdminRole } from '../lib/auth'
+import { PropertyManager } from '../components/admin/PropertyManager'
 import {
   fetchEnquiries, fetchTourRequests, updateLeadStatus,
   type EnquiryRow, type TourRow, type LeadStatus,
@@ -156,7 +157,7 @@ function ChangePassword({ onClose }: { onClose: () => void }) {
 
 function Dashboard({ email, role }: { email: string; role: AdminRole }) {
   const { t } = useLang()
-  const [tab, setTab] = useState<'enquiries' | 'tours'>('enquiries')
+  const [tab, setTab] = useState<'enquiries' | 'tours' | 'properties'>('enquiries')
   const [showPw, setShowPw] = useState(false)
   const [enquiries, setEnquiries] = useState<EnquiryRow[]>([])
   const [tours, setTours] = useState<TourRow[]>([])
@@ -200,18 +201,21 @@ function Dashboard({ email, role }: { email: string; role: AdminRole }) {
       </div>
 
       <div style={{ display: 'flex', gap: 8, margin: '18px 0 22px' }}>
-        {([['enquiries', Inbox, t({ ko: '문의', en: 'Enquiries' }), enquiries.length], ['tours', Plane, t({ ko: '투어신청', en: 'Tours' }), tours.length]] as const).map(([key, Icon, label, count]) => (
+        {([['enquiries', Inbox, t({ ko: '문의', en: 'Enquiries' }), String(enquiries.length)], ['tours', Plane, t({ ko: '투어신청', en: 'Tours' }), String(tours.length)], ['properties', Building2, t({ ko: '매물', en: 'Properties' }), '']] as const).map(([key, Icon, label, count]) => (
           <button key={key} onClick={() => setTab(key)} style={{
             display: 'inline-flex', alignItems: 'center', gap: 7,
             border: '1.5px solid ' + (tab === key ? 'var(--navy-700)' : 'var(--border-default)'),
             background: tab === key ? 'var(--navy-700)' : 'var(--surface-card)', color: tab === key ? '#fff' : 'var(--navy-700)',
             fontWeight: 600, fontSize: 13.5, padding: '9px 16px', borderRadius: 'var(--radius-md)', cursor: 'pointer',
           }}>
-            <Icon size={15} /> {label} <span style={{ fontFamily: 'var(--font-mono)', opacity: 0.8 }}>{count}</span>
+            <Icon size={15} /> {label} {count && <span style={{ fontFamily: 'var(--font-mono)', opacity: 0.8 }}>{count}</span>}
           </button>
         ))}
       </div>
 
+      {tab === 'properties' ? (
+        <PropertyManager />
+      ) : (
       <div style={{ background: 'var(--surface-card)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-lg)', overflow: 'hidden', boxShadow: 'var(--shadow-sm)' }}>
         <div style={{ overflowX: 'auto' }}>
           {loading ? (
@@ -262,6 +266,7 @@ function Dashboard({ email, role }: { email: string; role: AdminRole }) {
           )}
         </div>
       </div>
+      )}
       {showPw && <ChangePassword onClose={() => setShowPw(false)} />}
     </Section>
   )

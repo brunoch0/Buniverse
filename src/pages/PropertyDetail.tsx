@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, useParams, useNavigate } from 'react-router-dom'
 import { Check, MapPin, ArrowLeft, BedDouble, Bath, Maximize } from 'lucide-react'
 import { Section } from '../components/sections/Section'
@@ -7,15 +7,38 @@ import { Badge } from '../components/ui/Badge'
 import { PropertyCard } from '../components/property/PropertyCard'
 import { useLang } from '../i18n/LanguageContext'
 import { useEnquiry } from '../components/layout/enquiry'
-import { getListing, LISTINGS } from '../data/listings'
+import { fetchListingBySlug, fetchListings, type Listing } from '../lib/properties'
 
 export function PropertyDetail() {
   const { id } = useParams()
   const { t } = useLang()
   const onEnquire = useEnquiry()
   const navigate = useNavigate()
-  const listing = id ? getListing(id) : undefined
+  const [listing, setListing] = useState<Listing | null>(null)
+  const [similar, setSimilar] = useState<Listing[]>([])
+  const [loading, setLoading] = useState(true)
   const [active, setActive] = useState(0)
+
+  useEffect(() => {
+    let on = true
+    setLoading(true)
+    setActive(0)
+    ;(async () => {
+      const l = id ? await fetchListingBySlug(id) : null
+      if (!on) return
+      setListing(l)
+      if (l) {
+        const all = await fetchListings()
+        if (on) setSimilar(all.filter((x) => x.id !== l.id && x.type === l.type).slice(0, 3))
+      }
+      setLoading(false)
+    })()
+    return () => { on = false }
+  }, [id])
+
+  if (loading) {
+    return <Section bg="page"><p style={{ textAlign: 'center', color: 'var(--text-muted)' }}>{t({ ko: '불러오는 중…', en: 'Loading…' })}</p></Section>
+  }
 
   if (!listing) {
     return (
@@ -32,8 +55,7 @@ export function PropertyDetail() {
     )
   }
 
-  const similar = LISTINGS.filter((l) => l.id !== listing.id && l.type === listing.type).slice(0, 3)
-  const spec = (icon: React.ReactNode, label: string, value?: number | string) =>
+  const spec = (icon: React.ReactNode, label: string, value?: number | string | null) =>
     value == null ? null : (
       <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
         <span style={{ color: 'var(--gold-700)' }}>{icon}</span>
@@ -51,35 +73,37 @@ export function PropertyDetail() {
       </button>
 
       <div className="bun-detail-grid" style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1.6fr) minmax(280px, 1fr)', gap: 32, alignItems: 'start' }}>
-        {/* Gallery + info */}
         <div>
           <div style={{ borderRadius: 'var(--radius-xl)', overflow: 'hidden', boxShadow: 'var(--shadow-md)', aspectRatio: '16 / 10', position: 'relative' }}>
-            <img src={listing.gallery[active]} alt={listing.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            <img src={listing.gallery[active] ?? listing.image} alt={listing.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
             <div style={{ position: 'absolute', top: 14, left: 14, display: 'flex', gap: 6 }}>
               {listing.badges.map((b, i) => <Badge key={b} tone={i === 0 ? 'gold' : 'navy'} solid={i === 0}>{b}</Badge>)}
             </div>
           </div>
-          <div style={{ display: 'flex', gap: 10, marginTop: 12 }}>
-            {listing.gallery.map((g, i) => (
-              <button key={i} onClick={() => setActive(i)} style={{ flex: 1, padding: 0, border: '2px solid ' + (active === i ? 'var(--gold-500)' : 'transparent'), borderRadius: 'var(--radius-md)', overflow: 'hidden', cursor: 'pointer', aspectRatio: '16/10', background: 'none' }}>
-                <img src={g} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
-              </button>
-            ))}
-          </div>
-
-          <div style={{ marginTop: 28 }}>
-            <h3 style={{ margin: '0 0 14px', fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 20, color: 'var(--navy-900)' }}>{t({ ko: '핵심 포인트', en: 'Highlights' })}</h3>
-            <ul style={{ listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: 11 }}>
-              {listing.highlights.map((h) => (
-                <li key={h.en} style={{ display: 'flex', gap: 10, alignItems: 'flex-start', fontSize: 15, color: 'var(--text-body)' }}>
-                  <Check size={18} strokeWidth={2.4} style={{ color: 'var(--gold-600)', flexShrink: 0, marginTop: 1 }} /> {t(h)}
-                </li>
+          {listing.gallery.length > 1 && (
+            <div style={{ display: 'flex', gap: 10, marginTop: 12 }}>
+              {listing.gallery.map((g, i) => (
+                <button key={i} onClick={() => setActive(i)} style={{ flex: 1, padding: 0, border: '2px solid ' + (active === i ? 'var(--gold-500)' : 'transparent'), borderRadius: 'var(--radius-md)', overflow: 'hidden', cursor: 'pointer', aspectRatio: '16/10', background: 'none' }}>
+                  <img src={g} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+                </button>
               ))}
-            </ul>
-          </div>
+            </div>
+          )}
+
+          {listing.highlights.length > 0 && (
+            <div style={{ marginTop: 28 }}>
+              <h3 style={{ margin: '0 0 14px', fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 20, color: 'var(--navy-900)' }}>{t({ ko: '핵심 포인트', en: 'Highlights' })}</h3>
+              <ul style={{ listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: 11 }}>
+                {listing.highlights.map((h) => (
+                  <li key={h.en} style={{ display: 'flex', gap: 10, alignItems: 'flex-start', fontSize: 15, color: 'var(--text-body)' }}>
+                    <Check size={18} strokeWidth={2.4} style={{ color: 'var(--gold-600)', flexShrink: 0, marginTop: 1 }} /> {t(h)}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
         </div>
 
-        {/* Sticky summary card */}
         <div className="bun-detail-aside" style={{ position: 'sticky', top: 'calc(var(--header-height) + 16px)', background: 'var(--surface-card)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-xl)', padding: 26, boxShadow: 'var(--shadow-sm)' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 6, color: 'var(--text-muted)', fontSize: 13, marginBottom: 6 }}>
             <MapPin size={14} /> {listing.location}
@@ -106,7 +130,6 @@ export function PropertyDetail() {
         </div>
       </div>
 
-      {/* Similar */}
       {similar.length > 0 && (
         <div style={{ marginTop: 56 }}>
           <h3 style={{ margin: '0 0 22px', fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 22, color: 'var(--navy-900)' }}>{t({ ko: '비슷한 매물', en: 'Similar listings' })}</h3>
