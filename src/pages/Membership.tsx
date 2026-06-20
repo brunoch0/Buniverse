@@ -42,7 +42,7 @@ const TIERS: Tier[] = [
     ],
   },
   {
-    name: 'BLACK',
+    name: 'PLATINUM',
     tone: 'navy',
     tagline: { ko: '최상급 투자자를 위한 익스클루시브 서비스', en: 'Exclusive service for top investors' },
     audience: { ko: 'VIP 고객 전용', en: 'VIP only' },
@@ -136,6 +136,29 @@ export function Membership() {
                   {t({ ko: '가입 문의', en: 'Enquire' })}
                 </Button>
               </div>
+            </div>
+          ))}
+        </div>
+      </Section>
+
+      <Section bg="card">
+        <SectionHeading
+          align="center"
+          eyebrow={t({ ko: '제휴사 혜택', en: 'Affiliate benefits' })}
+          title={t({ ko: '두바이 라이프스타일 제휴 네트워크', en: 'A Dubai lifestyle partner network' })}
+          subtitle={t({ ko: '멤버십 회원은 제휴 요트·차량·호텔·웰니스 서비스를 우대 조건으로 이용할 수 있습니다.', en: 'Members enjoy preferential terms across partner yacht, car, hotel and wellness services.' })}
+        />
+        <div style={{ marginTop: 32, display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 16 }}>
+          {[
+            { name: { ko: '요트·마리나', en: 'Yacht & marina' }, perk: { ko: '렌트 10% 할인', en: '10% off charters' } },
+            { name: { ko: '프리미엄 차량', en: 'Premium cars' }, perk: { ko: '우선 예약·할인', en: 'Priority & discount' } },
+            { name: { ko: '5성급 호텔', en: '5-star hotels' }, perk: { ko: '업그레이드 혜택', en: 'Room upgrades' } },
+            { name: { ko: '웰니스·스파', en: 'Wellness & spa' }, perk: { ko: '전용 패키지', en: 'Exclusive packages' } },
+            { name: { ko: '법률·세무', en: 'Legal & tax' }, perk: { ko: '상담 우대', en: 'Priority consults' } },
+          ].map((a) => (
+            <div key={a.name.en} style={{ background: 'var(--surface-page)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-lg)', padding: '20px 18px', textAlign: 'center' }}>
+              <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 15, color: 'var(--navy-900)' }}>{t(a.name)}</div>
+              <div style={{ marginTop: 6, fontSize: 12.5, color: 'var(--gold-700)', fontWeight: 600 }}>{t(a.perk)}</div>
             </div>
           ))}
         </div>

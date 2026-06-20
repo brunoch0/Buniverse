@@ -1,3 +1,4 @@
+import { useNavigate } from 'react-router-dom'
 import { Target, Users, Sparkles, Plane, Check } from 'lucide-react'
 import { PageHero } from '../components/sections/PageHero'
 import { Section, SectionHeading } from '../components/sections/Section'
@@ -5,7 +6,6 @@ import { FeatureGrid, type Feature } from '../components/sections/FeatureGrid'
 import { Button } from '../components/ui/Button'
 import { CtaBand } from '../components/sections/CtaBand'
 import { useLang, type Localized } from '../i18n/LanguageContext'
-import { useEnquiry } from '../components/layout/enquiry'
 
 type LFeature = { icon: Feature['icon']; title: Localized<string>; desc: Localized<string> }
 
@@ -66,7 +66,7 @@ const ITINERARY: { day: Localized<string>; items: Localized<string>[] }[] = [
 
 export function Tour() {
   const { t } = useLang()
-  const onEnquire = useEnquiry()
+  const navigate = useNavigate()
   return (
     <>
       <PageHero
@@ -78,7 +78,7 @@ export function Tour() {
           en: 'Direct networking with Dubai business experts, top consultants and tier-one developers — the best decisions, in a focused window of time.',
         })}
       >
-        <Button variant="gold" size="lg" onClick={onEnquire} iconRight={<span style={{ fontSize: 18, lineHeight: 0 }}>→</span>}>
+        <Button variant="gold" size="lg" onClick={() => navigate('/tour/apply')} iconRight={<span style={{ fontSize: 18, lineHeight: 0 }}>→</span>}>
           {t({ ko: '투어 신청하기', en: 'Book a tour' })}
         </Button>
       </PageHero>

@@ -5,14 +5,12 @@ export interface NavItem {
   label: Localized<string>
 }
 
-/** Primary navigation — mirrors the original buniverse.ae menu. */
+/** Primary navigation — V2 IA (신뢰→탐색→전환). */
 export const NAV: NavItem[] = [
-  { path: '/about', label: { ko: '뷰니버스 소개', en: 'About' } },
+  { path: '/properties', label: { ko: '매물찾기', en: 'Properties' } },
+  { path: '/market-data', label: { ko: '시장데이터', en: 'Market Data' } },
+  { path: '/ai-center', label: { ko: 'AI 데이터센터', en: 'AI Center' } },
   { path: '/membership', label: { ko: '멤버십', en: 'Membership' } },
-  { path: '/tour', label: { ko: '투자투어', en: 'Tour' } },
-  { path: '/investment', label: { ko: '부동산투자', en: 'Real Estate' } },
-  { path: '/premium', label: { ko: '프리미엄투자', en: 'Premium' } },
-  { path: '/partner', label: { ko: '파트너', en: 'Partners' } },
   { path: '/community', label: { ko: '커뮤니티', en: 'Community' } },
 ]
 

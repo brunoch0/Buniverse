@@ -39,3 +39,7 @@ supabase/.temp/
 /Brand System/
 *.tar.gz
 .DS_Store
+.vercel
+
+# typescript build info
+*.tsbuildinfo

@@ -48,3 +48,23 @@ a:hover {
     display: inline-flex !important;
   }
 }
+
+/* Fixed-column grids collapse on small screens */
+@media (max-width: 860px) {
+  .bun-detail-grid {
+    grid-template-columns: 1fr !important;
+  }
+  .bun-detail-aside {
+    position: static !important;
+  }
+}
+@media (max-width: 760px) {
+  .bun-footer-grid {
+    grid-template-columns: 1fr 1fr !important;
+  }
+}
+@media (max-width: 440px) {
+  .bun-footer-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
