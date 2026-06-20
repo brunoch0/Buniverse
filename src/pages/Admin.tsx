@@ -5,7 +5,7 @@ import { Section } from '../components/sections/Section'
 import { Badge } from '../components/ui/Badge'
 import { Button } from '../components/ui/Button'
 import { useLang, type Localized } from '../i18n/LanguageContext'
-import { authConfigured, getSession, onAuthChange, signInWithPassword, sendOtp, verifyOtp, signOut, checkIsAdmin } from '../lib/auth'
+import { authConfigured, getSession, onAuthChange, signInWithPassword, sendOtp, verifyOtp, signOut, checkRole, type AdminRole } from '../lib/auth'
 import {
   fetchEnquiries, fetchTourRequests, updateLeadStatus,
   type EnquiryRow, type TourRow, type LeadStatus,
@@ -108,7 +108,7 @@ function StatusSelect({ value, onChange }: { value: LeadStatus; onChange: (s: Le
   )
 }
 
-function Dashboard({ email }: { email: string }) {
+function Dashboard({ email, role }: { email: string; role: AdminRole }) {
   const { t } = useLang()
   const [tab, setTab] = useState<'enquiries' | 'tours'>('enquiries')
   const [enquiries, setEnquiries] = useState<EnquiryRow[]>([])
@@ -140,7 +140,9 @@ function Dashboard({ email }: { email: string }) {
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12, marginBottom: 8 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <h1 style={{ margin: 0, fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: 'clamp(24px, 3vw, 32px)', color: 'var(--navy-900)' }}>{t({ ko: '어드민 콘솔', en: 'Admin Console' })}</h1>
-          <Badge tone="success" solid>{t({ ko: '로그인됨', en: 'Live' })}</Badge>
+          <Badge tone={role === 'owner' ? 'gold' : 'navy'} solid>
+            {role === 'owner' ? t({ ko: '소유자', en: 'Owner' }) : t({ ko: '관리자', en: 'Admin' })}
+          </Badge>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>{email}</span>
@@ -220,7 +222,7 @@ function Dashboard({ email }: { email: string }) {
 export function Admin() {
   const { t } = useLang()
   const [session, setSession] = useState<Session | null>(null)
-  const [isAdmin, setIsAdmin] = useState<boolean | null>(null)
+  const [role, setRole] = useState<AdminRole | null>(null)
   const [ready, setReady] = useState(false)
 
   useEffect(() => {
@@ -228,12 +230,12 @@ export function Admin() {
     getSession().then(async (s) => {
       if (!active) return
       setSession(s)
-      setIsAdmin(s ? await checkIsAdmin() : false)
+      setRole(s ? await checkRole() : null)
       setReady(true)
     })
     const unsub = onAuthChange(async (s) => {
       setSession(s)
-      setIsAdmin(s ? await checkIsAdmin() : false)
+      setRole(s ? await checkRole() : null)
       setReady(true)
     })
     return () => { active = false; unsub() }
@@ -246,7 +248,7 @@ export function Admin() {
     return <Section bg="page"><p style={{ textAlign: 'center', color: 'var(--text-muted)' }}>{t({ ko: '확인 중…', en: 'Checking…' })}</p></Section>
   }
   if (!session) return <Login />
-  if (!isAdmin) {
+  if (!role) {
     return (
       <Section bg="page">
         <div style={{ maxWidth: 420, margin: '0 auto', textAlign: 'center', background: 'var(--surface-card)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-xl)', padding: 40 }}>
@@ -257,5 +259,5 @@ export function Admin() {
       </Section>
     )
   }
-  return <Dashboard email={session.user.email ?? ''} />
+  return <Dashboard email={session.user.email ?? ''} role={role} />
 }

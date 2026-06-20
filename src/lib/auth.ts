@@ -31,12 +31,26 @@ export async function getSession(): Promise<Session | null> {
   return data.session
 }
 
-/** Returns true if the current user is allowlisted as admin. */
+/** Returns true if the current user is allowlisted as admin (owner or admin). */
 export async function checkIsAdmin(): Promise<boolean> {
   if (!supabase) return false
   const { data, error } = await supabase.rpc('is_admin')
   if (error) return false
   return data === true
+}
+
+export type AdminRole = 'owner' | 'admin'
+
+/** Resolve the current user's role: owner (full access) or admin. */
+export async function checkRole(): Promise<AdminRole | null> {
+  if (!supabase) return null
+  const [{ data: admin }, { data: owner }] = await Promise.all([
+    supabase.rpc('is_admin'),
+    supabase.rpc('is_owner'),
+  ])
+  if (owner === true) return 'owner'
+  if (admin === true) return 'admin'
+  return null
 }
 
 export function onAuthChange(cb: (session: Session | null) => void) {
