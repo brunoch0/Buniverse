@@ -91,7 +91,7 @@ public/brand/                  # 브랜드 이미지 (heroes/avatars/logo/proper
 | `/properties` | 매물찾기 | **Supabase `properties`** |
 | `/properties/:slug` | 매물 상세 | **Supabase `properties`** |
 | `/projects` | 신규 런칭 프로젝트 | 정적(샘플) |
-| `/market-data` | 시장데이터 | 정적(샘플) — 추후 DLD 연동 |
+| `/market-data` | 시장데이터 | **Supabase `market_area_summary`** (DLD 집계 스냅샷 + 지도) |
 | `/ai-center` | AI 데이터센터(예측+진단) | 정적(규칙 기반 mock) |
 | `/membership` | 멤버십 | 정적 |
 | `/content` | 콘텐츠센터 | 정적(샘플) |
@@ -135,6 +135,22 @@ highlights_ko text[], highlights_en text[], cover_image_url, image_urls text[], 
 
 **`admin_allowlist`** — 관리자 허용목록 `email, role (owner|admin), created_at`
 **`app_config`** — 키밸류 설정 (현재 `lead_webhook_url` = notify-lead 함수 URL)
+
+**`market_area_summary`** — 지역별 DLD 집계 시세 스냅샷
+```
+month, area_name, transaction_count, median_value_aed, price_per_sqm,
+ready_count, offplan_count, liquidity, premium, affordable,
+period_start, period_end, as_of, source, source_url, synced_at
+RLS: 공개 SELECT (집계 데이터, 개인정보 없음)
+```
+
+> ### ⚠️ 시장데이터 데이터 경계 (반드시 숙지)
+> 시장데이터는 외부 데이터 상품(**data.dubaitoday.org**, 두바이 부동산 집계)에서 온 것이지만,
+> **이 사이트(및 코드/자격증명)는 원본 데이터에 절대 접근할 수 없도록(역접근 차단) 설계되었습니다.**
+> - 이 레포·프론트엔드에는 원본 백엔드의 URL/키/연결이 **전혀 없습니다.** Buniverse Supabase 한 곳만 연결합니다.
+> - `market_area_summary`는 원본에서 **집계 요약만 단방향으로 복사한 스냅샷**입니다(원시 거래·개인정보 없음, 역추적 불가).
+> - 갱신은 **원본 측(데이터 제공자)이 Buniverse로 push**하는 방식으로만 구성하세요. **절대 Buniverse에 원본 자격증명을 저장하거나 원본으로 pull하지 마세요.** (그러면 역접근 경로가 생깁니다.)
+> - 출처 표기(`출처/기준일/면책`)는 `DataDisclosure` 컴포넌트로 모든 데이터 모듈에 유지합니다.
 
 ### RLS 정책 (요약)
 

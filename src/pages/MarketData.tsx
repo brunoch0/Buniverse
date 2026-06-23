@@ -8,23 +8,41 @@ import { useLang, type Localized } from '../i18n/LanguageContext'
 import { fetchMarketAreas, fmtAed, offplanRatio, type AreaSummary } from '../lib/marketData'
 
 const fmtDate = (d: string | null) => (d ? d.replace(/-/g, '.') : '')
+const MONTH_KO = ['', '1월', '2월', '3월', '4월', '5월', '6월', '7월', '8월', '9월', '10월', '11월', '12월']
+const MONTH_EN = ['', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+function monthLabel(m: string, lang: 'ko' | 'en') {
+  const [y, mm] = m.split('-')
+  const i = Number(mm)
+  return lang === 'ko' ? `${y}년 ${MONTH_KO[i]}` : `${MONTH_EN[i]} ${y}`
+}
 
 export function MarketData() {
-  const { t } = useLang()
-  const [areas, setAreas] = useState<AreaSummary[]>([])
+  const { t, lang } = useLang()
+  const [all, setAll] = useState<AreaSummary[]>([])
   const [loading, setLoading] = useState(true)
+  const [month, setMonth] = useState<string | null>(null)
   const [activeName, setActiveName] = useState<string | null>(null)
 
   useEffect(() => {
     let on = true
     fetchMarketAreas().then((a) => {
       if (!on) return
-      setAreas(a)
-      setActiveName(a[0]?.area_name ?? null)
+      setAll(a)
+      const latest = a.map((x) => x.month).sort().reverse()[0] ?? null
+      setMonth(latest)
       setLoading(false)
     })
     return () => { on = false }
   }, [])
+
+  const months = useMemo(() => Array.from(new Set(all.map((a) => a.month))).sort().reverse(), [all])
+  const areas = useMemo(
+    () => all.filter((a) => a.month === month).sort((x, y) => y.transaction_count - x.transaction_count),
+    [all, month],
+  )
+
+  // reset active area when month changes
+  useEffect(() => { setActiveName(areas[0]?.area_name ?? null) }, [month, areas])
 
   const source = useMemo(() => {
     const a = areas[0]
@@ -62,6 +80,26 @@ export function MarketData() {
           <div style={{ textAlign: 'center', padding: '56px 24px', color: 'var(--text-muted)' }}>{t({ ko: '데이터 준비 중입니다.', en: 'Data is being prepared.' })}</div>
         ) : (
           <>
+            {/* Month filter */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', marginBottom: 16 }}>
+              <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--navy-800)' }}>{t({ ko: '조회 월', en: 'Month' })}</span>
+              <div style={{ display: 'inline-flex', background: 'var(--surface-sunken)', borderRadius: 'var(--radius-full)', padding: 4, gap: 2, flexWrap: 'wrap' }}>
+                {months.map((m) => (
+                  <button
+                    key={m}
+                    onClick={() => setMonth(m)}
+                    style={{
+                      border: 'none', cursor: 'pointer', padding: '7px 14px', borderRadius: 'var(--radius-full)',
+                      background: month === m ? 'var(--navy-700)' : 'transparent', color: month === m ? '#fff' : 'var(--navy-700)',
+                      fontFamily: 'var(--font-body)', fontWeight: 600, fontSize: 13,
+                    }}
+                  >
+                    {monthLabel(m, lang)}
+                  </button>
+                ))}
+              </div>
+            </div>
+
             {/* Transaction period */}
             {period?.period_start && (
               <div style={{ display: 'inline-flex', alignItems: 'center', gap: 9, padding: '9px 16px', borderRadius: 'var(--radius-full)', background: 'var(--navy-050)', border: '1px solid var(--border-strong)', marginBottom: 22 }}>
@@ -93,7 +131,7 @@ export function MarketData() {
 
             {/* Map */}
             <div style={{ marginBottom: 14 }}>
-              <MarketMap areas={areas} activeArea={activeName ?? undefined} onSelect={setActiveName} />
+              <MarketMap key={month} areas={areas} activeArea={activeName ?? undefined} onSelect={setActiveName} />
             </div>
             <p style={{ margin: '0 0 22px', fontSize: 12.5, color: 'var(--text-muted)' }}>
               {t({ ko: '지도의 원에 마우스를 올리면 지역별 데이터가 표시됩니다. 원 크기는 거래량에 비례합니다.', en: 'Hover a circle for area data. Circle size scales with transaction volume.' })}
