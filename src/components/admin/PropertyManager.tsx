@@ -1,9 +1,10 @@
-import { useCallback, useEffect, useState } from 'react'
-import { Plus, Pencil, Trash2 } from 'lucide-react'
+import { useCallback, useEffect, useRef, useState } from 'react'
+import { Plus, Pencil, Trash2, Upload, X } from 'lucide-react'
 import { Button } from '../ui/Button'
 import { Badge } from '../ui/Badge'
 import { useLang } from '../../i18n/LanguageContext'
 import { fetchAllProperties, saveProperty, deleteProperty, LISTING_TYPES, type PropertyRow, type PropertyInput, type ListingType } from '../../lib/properties'
+import { uploadPropertyImage } from '../../lib/storage'
 
 const field: React.CSSProperties = {
   width: '100%', minHeight: 42, padding: '0 12px', borderRadius: 'var(--radius-md)',
@@ -28,6 +29,62 @@ function LabeledArea({ label, value, onChange }: { label: string; value: string;
     <div>
       <label style={labelStyle}>{label}</label>
       <textarea style={{ ...field, height: 70, padding: 10 }} value={value} onChange={(e) => onChange(e.target.value)} />
+    </div>
+  )
+}
+
+/** Upload one or more images to Supabase Storage; calls onUploaded(url) per file. */
+function ImageUploader({ label, multiple, onUploaded }: { label: string; multiple?: boolean; onUploaded: (url: string) => void }) {
+  const ref = useRef<HTMLInputElement>(null)
+  const [busy, setBusy] = useState(false)
+  const [err, setErr] = useState('')
+
+  const pick = async (files: FileList | null) => {
+    if (!files || files.length === 0) return
+    setErr(''); setBusy(true)
+    for (const file of Array.from(files)) {
+      const res = await uploadPropertyImage(file)
+      if (res.url) onUploaded(res.url)
+      else setErr(res.error || 'Upload failed')
+    }
+    setBusy(false)
+    if (ref.current) ref.current.value = ''
+  }
+
+  return (
+    <div style={{ marginTop: 8 }}>
+      <input ref={ref} type="file" accept="image/*" multiple={multiple} style={{ display: 'none' }} onChange={(e) => void pick(e.target.files)} />
+      <button
+        type="button"
+        onClick={() => ref.current?.click()}
+        disabled={busy}
+        style={{
+          display: 'inline-flex', alignItems: 'center', gap: 7, cursor: busy ? 'wait' : 'pointer',
+          border: '1.5px dashed var(--border-default)', background: 'var(--surface-sunken)', color: 'var(--navy-700)',
+          fontFamily: 'var(--font-body)', fontWeight: 600, fontSize: 13, padding: '8px 14px', borderRadius: 'var(--radius-md)',
+        }}
+      >
+        <Upload size={15} /> {busy ? '업로드 중…' : label}
+      </button>
+      {err && <span style={{ marginLeft: 10, fontSize: 12, color: 'var(--status-danger)' }}>{err}</span>}
+    </div>
+  )
+}
+
+function Thumbs({ urls, onRemove }: { urls: string[]; onRemove?: (i: number) => void }) {
+  if (urls.length === 0) return null
+  return (
+    <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 8 }}>
+      {urls.map((u, i) => (
+        <div key={i} style={{ position: 'relative', width: 70, height: 50, borderRadius: 'var(--radius-sm)', overflow: 'hidden', border: '1px solid var(--border-subtle)' }}>
+          <img src={u} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+          {onRemove && (
+            <button type="button" onClick={() => onRemove(i)} style={{ position: 'absolute', top: 2, right: 2, width: 18, height: 18, borderRadius: '50%', border: 'none', background: 'rgba(12,20,48,0.7)', color: '#fff', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', padding: 0 }}>
+              <X size={11} />
+            </button>
+          )}
+        </div>
+      ))}
     </div>
   )
 }
@@ -104,8 +161,16 @@ function PropertyForm({ initial, onClose, onSaved }: { initial: PropertyInput; o
             <LabeledArea label={t({ ko: '핵심포인트 (한, 줄바꿈)', en: 'Highlights (KO, lines)' })} value={f.highlights_ko.join('\n')} onChange={(v) => set('highlights_ko', lines(v))} />
             <LabeledArea label={t({ ko: '핵심포인트 (영, 줄바꿈)', en: 'Highlights (EN, lines)' })} value={f.highlights_en.join('\n')} onChange={(v) => set('highlights_en', lines(v))} />
           </div>
-          <LabeledInput label={t({ ko: '대표 이미지 URL', en: 'Cover image URL' })} value={f.cover_image_url} onChange={(v) => set('cover_image_url', v)} placeholder="/brand/heroes/...png 또는 https://..." />
-          <LabeledArea label={t({ ko: '갤러리 이미지 URL (줄바꿈)', en: 'Gallery image URLs (lines)' })} value={f.image_urls.join('\n')} onChange={(v) => set('image_urls', lines(v))} />
+          <div>
+            <LabeledInput label={t({ ko: '대표 이미지 URL', en: 'Cover image URL' })} value={f.cover_image_url} onChange={(v) => set('cover_image_url', v)} placeholder="/brand/heroes/...png 또는 https://..." />
+            <ImageUploader label={t({ ko: '대표 이미지 업로드', en: 'Upload cover image' })} onUploaded={(url) => set('cover_image_url', url)} />
+            <Thumbs urls={f.cover_image_url ? [f.cover_image_url] : []} onRemove={() => set('cover_image_url', '')} />
+          </div>
+          <div>
+            <LabeledArea label={t({ ko: '갤러리 이미지 URL (줄바꿈)', en: 'Gallery image URLs (lines)' })} value={f.image_urls.join('\n')} onChange={(v) => set('image_urls', lines(v))} />
+            <ImageUploader label={t({ ko: '갤러리 이미지 추가', en: 'Add gallery images' })} multiple onUploaded={(url) => setF((p) => ({ ...p, image_urls: [...p.image_urls, url] }))} />
+            <Thumbs urls={f.image_urls} onRemove={(i) => setF((p) => ({ ...p, image_urls: p.image_urls.filter((_, j) => j !== i) }))} />
+          </div>
         </div>
 
         {err && <p style={{ margin: '14px 0 0', fontSize: 13, color: 'var(--status-danger)' }}>{err}</p>}

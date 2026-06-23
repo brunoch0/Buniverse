@@ -18,14 +18,7 @@ interface Content {
   place?: string
 }
 
-const ITEMS: Content[] = [
-  { category: 'buniverse', image: '/brand/heroes/hero-sunset-skyline.png', title: { ko: '2026 두바이 부동산 시장 전망 리포트', en: '2026 Dubai property outlook report' }, summary: { ko: '지역별 시세 흐름과 투자 포인트를 정리한 분기 리포트.', en: 'A quarterly report on area pricing and investment angles.' } },
-  { category: 'buniverse', image: '/brand/heroes/hero-waterfront-panorama.png', title: { ko: '골든비자 완벽 가이드', en: 'The complete golden-visa guide' }, summary: { ko: '부동산 투자 기반 골든비자 취득 절차와 요건 총정리.', en: 'Everything on obtaining a golden visa via property investment.' } },
-  { category: 'collab', image: '/brand/heroes/hero-isometric-district.png', title: { ko: 'DAMAC 신규 프로젝트 콜라보 콘텐츠', en: 'DAMAC new-project collaboration' }, summary: { ko: '공식 파트너 DAMAC과 함께한 단독 프로젝트 소개.', en: 'An exclusive project feature with official partner DAMAC.' } },
-  { category: 'collab', image: '/brand/heroes/hero-marina-frame.png', title: { ko: '현지 법무법인 세무 웨비나', en: 'Local law-firm tax webinar' }, summary: { ko: '두바이 세무 거주와 법인 구조를 다룬 협업 웨비나.', en: 'A joint webinar on Dubai tax residency and corporate structure.' } },
-  { category: 'seminar', image: '/brand/heroes/hero-resort-pools.png', title: { ko: '서울 두바이 부동산 투자 세미나', en: 'Seoul Dubai investment seminar' }, summary: { ko: '채현민 대표와 함께하는 오프라인 투자 세미나.', en: 'An in-person seminar with CEO Chae Hyun-min.' }, date: '2026-07-12', place: '서울 강남' },
-  { category: 'seminar', image: '/brand/heroes/hero-island-aerial.png', title: { ko: '두바이 현지 투자 투어 설명회', en: 'Dubai investment tour briefing' }, summary: { ko: '4박6일 투자 투어 일정과 혜택을 안내하는 설명회.', en: 'A briefing on the 6-day investment tour and its benefits.' }, date: '2026-07-26', place: '온라인' },
-]
+const ITEMS: Content[] = []
 
 const CATS: { key: Category | 'all'; label: Localized<string> }[] = [
   { key: 'all', label: { ko: '전체', en: 'All' } },
@@ -61,6 +54,11 @@ export function ContentCenter() {
           ))}
         </div>
 
+        {items.length === 0 && (
+          <div style={{ padding: '56px 24px', textAlign: 'center', color: 'var(--text-muted)', fontSize: 15, background: 'var(--surface-card)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-lg)' }}>
+            {t({ ko: '콘텐츠를 준비 중입니다. 곧 만나보실 수 있습니다.', en: 'Content is on the way — coming soon.' })}
+          </div>
+        )}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 22 }}>
           {items.map((it) => {
             const catLabel = CATS.find((c) => c.key === it.category)!.label

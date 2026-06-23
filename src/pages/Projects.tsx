@@ -17,14 +17,7 @@ interface Project {
   highlights: Localized<string>[]
 }
 
-const PROJECTS: Project[] = [
-  { name: 'Safa Two', developer: 'DAMAC', region: 'Business Bay', image: '/brand/property/damac-safa-two.png', priceFrom: 'AED 2.4M', handover: '2027 Q4', highlights: [{ ko: 'de GRISOGONO 협업', en: 'de GRISOGONO collaboration' }, { ko: '분할 납부 플랜', en: 'Payment plan' }] },
-  { name: 'Marina Vista', developer: 'Emaar', region: 'Dubai Marina', image: '/brand/heroes/hero-marina-frame.png', priceFrom: 'AED 1.9M', handover: '2026 Q2', highlights: [{ ko: '마리나·바다 전망', en: 'Marina & sea views' }, { ko: '비치 액세스', en: 'Beach access' }] },
-  { name: 'Downtown Views III', developer: 'Emaar', region: 'Downtown Dubai', image: '/brand/heroes/hero-waterfront-panorama.png', priceFrom: 'AED 2.1M', handover: '2026 Q4', highlights: [{ ko: '부르즈 칼리파 전망', en: 'Burj Khalifa views' }, { ko: '두바이 몰 연결', en: 'Dubai Mall link' }] },
-  { name: 'Palm Beach Towers', developer: 'Nakheel', region: 'Palm Jumeirah', image: '/brand/heroes/hero-coastline-villas.png', priceFrom: 'AED 3.2M', handover: '2027 Q1', highlights: [{ ko: '프라이빗 비치', en: 'Private beach' }, { ko: '프리홀드', en: 'Freehold' }] },
-  { name: 'Binghatti Gateway', developer: 'Binghatti', region: 'JVC', image: '/brand/heroes/hero-isometric-district.png', priceFrom: 'AED 0.85M', handover: '2026 Q3', highlights: [{ ko: '합리적 진입가', en: 'Accessible entry price' }, { ko: '높은 임대 수요', en: 'Strong rental demand' }] },
-  { name: 'Aykon City', developer: 'DAMAC', region: 'Business Bay', image: '/brand/heroes/hero-sunset-skyline.png', priceFrom: 'AED 1.6M', handover: '2026 Q4', highlights: [{ ko: '운하 전망', en: 'Canal views' }, { ko: '복합 단지', en: 'Mixed-use district' }] },
-]
+const PROJECTS: Project[] = []
 
 const REGIONS = ['Business Bay', 'Dubai Marina', 'Downtown Dubai', 'Palm Jumeirah', 'JVC']
 const DEVELOPERS = ['EMAAR', 'DAMAC', 'Nakheel', 'Binghatti']
@@ -77,6 +70,14 @@ export function Projects() {
           {chips.map((c) => <button key={c} onClick={() => setValue(c)} style={chipStyle(value === c)}>{c}</button>)}
         </div>
 
+        {filtered.length === 0 && (
+          <div style={{ padding: '56px 24px', textAlign: 'center', background: 'var(--surface-card)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-lg)' }}>
+            <p style={{ margin: '0 0 18px', color: 'var(--text-body)', fontSize: 15 }}>
+              {t({ ko: '신규 런칭 프로젝트를 준비 중입니다. 관심 지역·개발사를 알려주시면 먼저 안내드립니다.', en: 'New launches are being prepared. Tell us your preferred area or developer and we’ll notify you first.' })}
+            </p>
+            <Button variant="gold" onClick={onEnquire}>{t({ ko: '프로젝트 문의', en: 'Enquire' })}</Button>
+          </div>
+        )}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 22 }}>
           {filtered.map((p) => (
             <div key={p.name} style={{ background: 'var(--surface-card)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-lg)', overflow: 'hidden', boxShadow: 'var(--shadow-sm)', display: 'flex', flexDirection: 'column' }}>

@@ -17,13 +17,7 @@ interface Post {
 
 const isNotice = (no: number) => no === 0
 
-const POSTS: Post[] = [
-  { no: 0, category: { ko: '공지', en: 'Notice' }, title: { ko: '두바이 단기·장기 렌트 서비스 안내', en: 'Dubai short- & long-term rental services' }, author: { ko: '관리자', en: 'Admin' }, date: '2025.04.15', views: 334 },
-  { no: 4, category: { ko: '후기', en: 'Story' }, title: { ko: '비지니스 부동산 투어 후기', en: 'My business property tour experience' }, author: { ko: '정재욱', en: 'J. Jung' }, date: '2025.11.28', views: 284 },
-  { no: 3, category: { ko: '렌트', en: 'Rental' }, title: { ko: '다운타운 풀옵션 아파트 단기 렌트', en: 'Downtown fully-furnished short-term rental' }, author: { ko: '김렌트', en: 'Kim' }, date: '2025.06.11', views: 101 },
-  { no: 2, category: { ko: '렌트', en: 'Rental' }, title: { ko: '마리나 전망 아파트 월세', en: 'Marina-view apartment, monthly' }, author: { ko: 'john', en: 'john' }, date: '2025.06.08', views: 88 },
-  { no: 1, category: { ko: '투자', en: 'Investing' }, title: { ko: '두바이 분양권 투자 시 체크리스트', en: 'A checklist for off-plan investing in Dubai' }, author: { ko: '어드바이저', en: 'Advisor' }, date: '2025.05.30', views: 540 },
-]
+const POSTS: Post[] = []
 
 const CATEGORIES: Localized<string>[] = [
   { ko: '전체', en: 'All' },
@@ -96,6 +90,11 @@ export function Community() {
 
         {/* Board */}
         <div style={{ background: 'var(--surface-card)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-lg)', overflow: 'hidden', boxShadow: 'var(--shadow-sm)' }}>
+          {POSTS.length === 0 && (
+            <div style={{ padding: '56px 24px', textAlign: 'center', color: 'var(--text-muted)', fontSize: 15 }}>
+              {t({ ko: '아직 등록된 글이 없습니다. 곧 정식 오픈됩니다.', en: 'No posts yet — the board opens soon.' })}
+            </div>
+          )}
           {POSTS.map((p, i) => (
             <div
               key={p.no}
