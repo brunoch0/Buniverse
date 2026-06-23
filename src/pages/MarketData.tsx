@@ -1,19 +1,28 @@
 import { useEffect, useMemo, useState } from 'react'
+import { CalendarRange } from 'lucide-react'
 import { PageHero } from '../components/sections/PageHero'
 import { Section, SectionHeading } from '../components/sections/Section'
 import { DataDisclosure } from '../components/sections/DataDisclosure'
+import { MarketMap } from '../components/sections/MarketMap'
 import { useLang, type Localized } from '../i18n/LanguageContext'
 import { fetchMarketAreas, fmtAed, offplanRatio, type AreaSummary } from '../lib/marketData'
+
+const fmtDate = (d: string | null) => (d ? d.replace(/-/g, '.') : '')
 
 export function MarketData() {
   const { t } = useLang()
   const [areas, setAreas] = useState<AreaSummary[]>([])
   const [loading, setLoading] = useState(true)
-  const [active, setActive] = useState(0)
+  const [activeName, setActiveName] = useState<string | null>(null)
 
   useEffect(() => {
     let on = true
-    fetchMarketAreas().then((a) => { if (on) { setAreas(a); setLoading(false) } })
+    fetchMarketAreas().then((a) => {
+      if (!on) return
+      setAreas(a)
+      setActiveName(a[0]?.area_name ?? null)
+      setLoading(false)
+    })
     return () => { on = false }
   }, [])
 
@@ -22,7 +31,8 @@ export function MarketData() {
     return a ? { sourceName: `${a.source} · data.dubaitoday.org`, sourceUrl: a.source_url, asOfDate: a.as_of } : null
   }, [areas])
 
-  const area = areas[active]
+  const period = areas[0]
+  const area = areas.find((a) => a.area_name === activeName) ?? areas[0]
 
   const metrics: { label: Localized<string>; value: string; primary?: boolean }[] = area
     ? [
@@ -52,16 +62,27 @@ export function MarketData() {
           <div style={{ textAlign: 'center', padding: '56px 24px', color: 'var(--text-muted)' }}>{t({ ko: '데이터 준비 중입니다.', en: 'Data is being prepared.' })}</div>
         ) : (
           <>
+            {/* Transaction period */}
+            {period?.period_start && (
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: 9, padding: '9px 16px', borderRadius: 'var(--radius-full)', background: 'var(--navy-050)', border: '1px solid var(--border-strong)', marginBottom: 22 }}>
+                <CalendarRange size={16} style={{ color: 'var(--gold-700)' }} />
+                <span style={{ fontSize: 13.5, color: 'var(--navy-800)', fontWeight: 600 }}>
+                  {t({ ko: '거래 기간', en: 'Transaction period' })}:{' '}
+                  <span style={{ fontFamily: 'var(--font-mono)' }}>{fmtDate(period.period_start)} ~ {fmtDate(period.period_end)}</span>
+                </span>
+              </div>
+            )}
+
             {/* Region selector */}
-            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 24 }}>
-              {areas.map((a, i) => (
+            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 20 }}>
+              {areas.map((a) => (
                 <button
                   key={a.area_name}
-                  onClick={() => setActive(i)}
+                  onClick={() => setActiveName(a.area_name)}
                   style={{
-                    border: '1.5px solid ' + (active === i ? 'var(--navy-700)' : 'var(--border-default)'),
-                    background: active === i ? 'var(--navy-700)' : 'transparent',
-                    color: active === i ? '#fff' : 'var(--navy-700)',
+                    border: '1.5px solid ' + (a.area_name === activeName ? 'var(--navy-700)' : 'var(--border-default)'),
+                    background: a.area_name === activeName ? 'var(--navy-700)' : 'transparent',
+                    color: a.area_name === activeName ? '#fff' : 'var(--navy-700)',
                     fontWeight: 600, fontSize: 13, padding: '8px 15px', borderRadius: 'var(--radius-full)', cursor: 'pointer',
                   }}
                 >
@@ -70,11 +91,19 @@ export function MarketData() {
               ))}
             </div>
 
+            {/* Map */}
+            <div style={{ marginBottom: 14 }}>
+              <MarketMap areas={areas} activeArea={activeName ?? undefined} onSelect={setActiveName} />
+            </div>
+            <p style={{ margin: '0 0 22px', fontSize: 12.5, color: 'var(--text-muted)' }}>
+              {t({ ko: '지도의 원에 마우스를 올리면 지역별 데이터가 표시됩니다. 원 크기는 거래량에 비례합니다.', en: 'Hover a circle for area data. Circle size scales with transaction volume.' })}
+            </p>
+
             {/* Metric cards */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 18 }}>
               {metrics.map((m) => (
                 <div key={m.label.en} style={{ background: 'var(--surface-card)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-lg)', padding: 22, boxShadow: 'var(--shadow-sm)' }}>
-                  <div style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 8 }}>{t(m.label)}</div>
+                  <div style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 8 }}>{t(m.label)} · {area.area_name}</div>
                   <div style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: 26, letterSpacing: '-0.02em', color: m.primary ? 'var(--gold-600)' : 'var(--navy-800)' }}>
                     {m.value}
                   </div>
@@ -108,7 +137,7 @@ export function MarketData() {
               </thead>
               <tbody>
                 {byPrice.map((a) => (
-                  <tr key={a.area_name} style={{ borderTop: '1px solid var(--border-subtle)' }}>
+                  <tr key={a.area_name} style={{ borderTop: '1px solid var(--border-subtle)', cursor: 'pointer', background: a.area_name === activeName ? 'var(--navy-050)' : 'transparent' }} onClick={() => setActiveName(a.area_name)}>
                     <td style={{ padding: '12px', fontWeight: 600, color: 'var(--navy-900)' }}>{a.area_name}</td>
                     <td style={{ padding: '12px', fontFamily: 'var(--font-mono)', fontSize: 13, color: 'var(--navy-800)' }}>{fmtAed(a.median_value_aed)}</td>
                     <td style={{ padding: '12px', fontFamily: 'var(--font-mono)', fontSize: 13, color: 'var(--navy-800)' }}>{a.price_per_sqm.toLocaleString()}</td>

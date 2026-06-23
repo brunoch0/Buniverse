@@ -14,8 +14,26 @@ export interface AreaSummary {
   affordable: number
   value_growth_pct: number | null
   as_of: string
+  period_start: string | null
+  period_end: string | null
   source: string
   source_url: string
+}
+
+/** Approximate centroids (lat, lng) for mapping DLD communities. */
+export const AREA_COORDS: Record<string, [number, number]> = {
+  'Madinat Al Mataar': [24.896, 55.161],
+  MAJAN: [25.052, 55.269],
+  'Dubai Land Residence Complex': [25.038, 55.301],
+  'Jumeirah Village Circle': [25.058, 55.207],
+  'Business Bay': [25.187, 55.265],
+  'Palm Deira': [25.3, 55.33],
+  'Dubai Investment Park First': [24.972, 55.178],
+  'International City Ph 2 & 3': [25.165, 55.408],
+  'Al Hebiah Fifth': [25.03, 55.225],
+  'City of Arabia': [25.048, 55.272],
+  'Jabal Ali First': [25.001, 55.103],
+  Arjan: [25.061, 55.238],
 }
 
 export async function fetchMarketAreas(): Promise<AreaSummary[]> {
