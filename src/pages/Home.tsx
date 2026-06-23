@@ -1,6 +1,6 @@
 import { HeroV2 } from '../sections/HeroV2'
 import { ServiceNav } from '../sections/ServiceNav'
-import { Founder } from '../sections/Founder'
+import { CompanyIntro } from '../sections/CompanyIntro'
 import { Partners } from '../sections/Partners'
 import { Process } from '../sections/Process'
 import { Results } from '../sections/Results'
@@ -11,7 +11,7 @@ export function Home() {
     <>
       <HeroV2 />
       <ServiceNav />
-      <Founder />
+      <CompanyIntro />
       <Partners />
       <Process />
       <Results />
