@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { Outlet, useLocation } from 'react-router-dom'
 import { SiteHeader } from './SiteHeader'
 import { SiteFooter } from './SiteFooter'
-import { AnnouncementBar } from './AnnouncementBar'
+import { EventPopup } from './EventPopup'
 import { EnquiryModal } from '../../sections/EnquiryModal'
 import { EnquiryContext } from './enquiry'
 
@@ -17,13 +17,13 @@ export function Layout() {
 
   return (
     <EnquiryContext.Provider value={() => setModal(true)}>
-      <AnnouncementBar />
       <SiteHeader />
       <main>
         <Outlet />
       </main>
       <SiteFooter />
       <EnquiryModal open={modal} onClose={() => setModal(false)} />
+      <EventPopup />
     </EnquiryContext.Provider>
   )
 }
