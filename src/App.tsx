@@ -10,6 +10,7 @@ import { AiCenter } from './pages/AiCenter'
 import { Membership } from './pages/Membership'
 import { ContentCenter } from './pages/ContentCenter'
 import { Community } from './pages/Community'
+import { Event } from './pages/Event'
 import { Admin } from './pages/Admin'
 import { About } from './pages/About'
 import { Tour } from './pages/Tour'
@@ -35,6 +36,7 @@ export default function App() {
             <Route path="/membership" element={<Membership />} />
             <Route path="/content" element={<ContentCenter />} />
             <Route path="/community" element={<Community />} />
+            <Route path="/event" element={<Event />} />
             {/* Ops */}
             <Route path="/admin" element={<Admin />} />
             {/* Supporting */}

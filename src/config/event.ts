@@ -11,6 +11,8 @@ export const EVENT = {
     'https://docs.google.com/forms/d/e/1FAIpQLScCRMbBgGpt4l50w-dVNqQmN0nCMyxsQCqvIK-JugVNsG_9lA/viewform?usp=send_form',
   // Poster image shown in the popup (720x1080). Empty → branded fallback card.
   posterUrl: '/brand/event/damac-roadshow.png',
+  // Full invitation image for the event page (720x3140).
+  inviteUrl: '/brand/event/damac-invitation.png',
   brand: 'DAMAC EXCLUSIVE ROADSHOW',
   title: 'LUXURY GATE TO DUBAI',
   date: '2026.06.28',
