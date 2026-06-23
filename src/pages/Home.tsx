@@ -1,4 +1,5 @@
 import { HeroV2 } from '../sections/HeroV2'
+import { EventBanner } from '../sections/EventBanner'
 import { ServiceNav } from '../sections/ServiceNav'
 import { Founder } from '../sections/Founder'
 import { Partners } from '../sections/Partners'
@@ -10,6 +11,7 @@ export function Home() {
   return (
     <>
       <HeroV2 />
+      <EventBanner />
       <ServiceNav />
       <Founder />
       <Partners />
