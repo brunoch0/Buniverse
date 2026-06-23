@@ -9,9 +9,8 @@ export const EVENT = {
   activeUntil: '2026-06-29T00:00:00+09:00', // expires after 2026-06-28 (Seoul time)
   formUrl:
     'https://docs.google.com/forms/d/e/1FAIpQLScCRMbBgGpt4l50w-dVNqQmN0nCMyxsQCqvIK-JugVNsG_9lA/viewform?usp=send_form',
-  // Optional poster image for the popup. Put a file in public/ (e.g. /brand/event/damac-roadshow.jpg)
-  // and set its path here to show the real poster instead of the branded card.
-  posterUrl: '',
+  // Poster image shown in the popup (720x1080). Empty → branded fallback card.
+  posterUrl: '/brand/event/damac-roadshow.png',
   brand: 'DAMAC EXCLUSIVE ROADSHOW',
   title: 'LUXURY GATE TO DUBAI',
   date: '2026.06.28',
