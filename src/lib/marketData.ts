@@ -1,0 +1,41 @@
+import { supabase } from './supabaseClient'
+
+/** Aggregated DLD area metrics (snapshot imported from data.dubaitoday.org). */
+export interface AreaSummary {
+  month: string
+  area_name: string
+  transaction_count: number
+  median_value_aed: number
+  price_per_sqm: number
+  ready_count: number
+  offplan_count: number
+  liquidity: number
+  premium: number
+  affordable: number
+  value_growth_pct: number | null
+  as_of: string
+  source: string
+  source_url: string
+}
+
+export async function fetchMarketAreas(): Promise<AreaSummary[]> {
+  if (!supabase) return []
+  const { data } = await supabase
+    .from('market_area_summary')
+    .select('*')
+    .order('transaction_count', { ascending: false })
+  return (data as AreaSummary[]) ?? []
+}
+
+/** AED 745000 -> "AED 0.75M" / "AED 745K". */
+export function fmtAed(v: number | null | undefined): string {
+  if (v == null) return '—'
+  if (v >= 1_000_000) return `AED ${(v / 1_000_000).toFixed(2)}M`
+  if (v >= 1_000) return `AED ${Math.round(v / 1_000)}K`
+  return `AED ${v}`
+}
+
+export function offplanRatio(a: AreaSummary): number {
+  const total = (a.ready_count ?? 0) + (a.offplan_count ?? 0)
+  return total > 0 ? Math.round((a.offplan_count / total) * 100) : 0
+}

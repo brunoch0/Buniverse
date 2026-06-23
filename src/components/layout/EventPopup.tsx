@@ -45,10 +45,35 @@ export function EventPopup() {
         </button>
 
         {EVENT.posterUrl ? (
-          /* Real poster image */
-          <a href={EVENT.formUrl} target="_blank" rel="noopener noreferrer" style={{ display: 'block' }}>
-            <img src={EVENT.posterUrl} alt={EVENT.title} style={{ width: '100%', display: 'block' }} />
-          </a>
+          /* Real poster image + register button */
+          <div>
+            <a href={EVENT.formUrl} target="_blank" rel="noopener noreferrer" style={{ display: 'block' }}>
+              <img src={EVENT.posterUrl} alt={EVENT.title} style={{ width: '100%', display: 'block' }} />
+            </a>
+            <div style={{ padding: '16px 18px 4px', background: 'var(--surface-card)' }}>
+              <a
+                href={EVENT.formUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: 9,
+                  height: 52,
+                  borderRadius: 'var(--radius-full)',
+                  background: 'var(--gold-500)',
+                  color: 'var(--navy-900)',
+                  fontWeight: 800,
+                  fontSize: 16,
+                  textDecoration: 'none',
+                  boxShadow: 'var(--shadow-gold)',
+                }}
+              >
+                {t({ ko: '참가 신청하기', en: 'Register now' })} <ArrowRight size={19} />
+              </a>
+            </div>
+          </div>
         ) : (
           /* Branded card */
           <a href={EVENT.formUrl} target="_blank" rel="noopener noreferrer" style={{ display: 'block', textDecoration: 'none' }}>
